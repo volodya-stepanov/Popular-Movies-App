@@ -13,8 +13,8 @@ import java.util.List;
 /**
  * Created by Володя on 10.10.2016.
  */
-public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
-    private static final String LOG_TAG = AndroidFlavorAdapter.class.getSimpleName();
+public class MovieEntryAdapter extends ArrayAdapter<MovieEntry> {
+    private static final String LOG_TAG = MovieEntryAdapter.class.getSimpleName();
 
     /**
      * Это наш собственный конструктор (он не отражает конструктор суперкласса).
@@ -22,15 +22,15 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
      * наполнить списки
      *
      * @param context           Текущий контекст. Используется, чтобы заполнить файл макета
-     * @param androidFlavors    Список объектов класса AndroidFlavor для отображения в списке
+     * @param movieEntries    Список объектов класса MovieEntry для отображения в списке
      */
-    public AndroidFlavorAdapter(Activity context, List<AndroidFlavor> androidFlavors)
+    public MovieEntryAdapter(Activity context, List<MovieEntry> movieEntries)
     {
         // Здесь мы инициализируем внутреннее хранилище объектов ArrayAdapter для контекста и списка.
         // Второй аргумент используется, когда ArrayAdapter наполняет одиночное TextView.
         // Поскольку это пользовательский адаптер для двух объектов TextView и ImageView, адаптер не
         // будет использовать этот второй аргумент, поэтому он может быть любым значением. Здесь мы использовали 0.
-        super(context, 0, androidFlavors);
+        super(context, 0, movieEntries);
     }
 
     /**
@@ -44,8 +44,8 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Получает объект AndroidFlavor из ArrayAdapterа на указанной позиции
-        AndroidFlavor androidFlavor = getItem(position);
+        // Получает объект MovieEntry из ArrayAdapterа на указанной позиции
+        MovieEntry movieEntry = getItem(position);
 
         // Адаптеры рециркулируют элементы view элементам AdapterView
         // Если это новый элемент view, который мы получаем, то мы заполняем макет
@@ -57,11 +57,11 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
         }
 
         ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
-        iconView.setImageResource(androidFlavor.image);
+        iconView.setImageResource(movieEntry.image);
 
         TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
-        versionNameView.setText(androidFlavor.versionName
-                + " - " + androidFlavor.versionNumber);
+        versionNameView.setText(movieEntry.originalTitle
+                + " - " + movieEntry.plotSynopsis);
 
         return convertView;
     }

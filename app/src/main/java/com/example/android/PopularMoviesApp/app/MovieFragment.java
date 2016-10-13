@@ -13,6 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,19 +33,32 @@ public class MovieFragment extends Fragment {
     public MovieFragment() {
     }
 
-    private AndroidFlavorAdapter flavorAdapter;
+    private MovieEntryAdapter movieEntryAdapter;
 
-    AndroidFlavor[] androidFlavors = {
-            new AndroidFlavor("Cupcake", "1.5", R.drawable.cupcake),
-            new AndroidFlavor("Donut", "1.6", R.drawable.donut),
-            new AndroidFlavor("Eclair", "2.0-2.1", R.drawable.eclair),
-            new AndroidFlavor("Froyo", "2.2-2.3", R.drawable.froyo),
-            new AndroidFlavor("Gingerbread", "2.3-2.3.7", R.drawable.gingerbread),
-            new AndroidFlavor("Honeycomb", "3.0-3.2.6", R.drawable.honeycomb),
-            new AndroidFlavor("Ice Cream Sandwich", "4.0-4.0.4", R.drawable.icecream),
-            new AndroidFlavor("Jelly Bean", "4.1-4.3.1", R.drawable.jellybean),
-            new AndroidFlavor("KitKat", "4.4-4.4.4, 4.4W-4.4W.2", R.drawable.kitkat),
-            new AndroidFlavor("Lollipop", "5.0-5.1.1", R.drawable.lollipop)
+//    MovieEntry[] movieEntries = {
+//            new MovieEntry("Cupcake", "1.5", R.drawable.cupcake),
+//            new MovieEntry("Donut", "1.6", R.drawable.donut),
+//            new MovieEntry("Eclair", "2.0-2.1", R.drawable.eclair),
+//            new MovieEntry("Froyo", "2.2-2.3", R.drawable.froyo),
+//            new MovieEntry("Gingerbread", "2.3-2.3.7", R.drawable.gingerbread),
+//            new MovieEntry("Honeycomb", "3.0-3.2.6", R.drawable.honeycomb),
+//            new MovieEntry("Ice Cream Sandwich", "4.0-4.0.4", R.drawable.icecream),
+//            new MovieEntry("Jelly Bean", "4.1-4.3.1", R.drawable.jellybean),
+//            new MovieEntry("KitKat", "4.4-4.4.4, 4.4W-4.4W.2", R.drawable.kitkat),
+//            new MovieEntry("Lollipop", "5.0-5.1.1", R.drawable.lollipop)
+//    };
+
+    MovieEntry[] movieEntries = {
+            new MovieEntry("Cupcake"),
+            new MovieEntry("Donut"),
+            new MovieEntry("Eclair"),
+            new MovieEntry("Froyo"),
+            new MovieEntry("Gingerbread"),
+            new MovieEntry("Honeycomb"),
+            new MovieEntry("Ice Cream Sandwich"),
+            new MovieEntry("Jelly Bean"),
+            new MovieEntry("KitKat"),
+            new MovieEntry("Lollipop")
     };
 
     @Override
@@ -56,12 +73,12 @@ public class MovieFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        // Создаём новый экземпляр класса AndroidFlavorAdapter. В качестве контекста передаём getActivity(), в качестве массива - flavorList.
-        flavorAdapter = new AndroidFlavorAdapter(getActivity(), Arrays.asList(androidFlavors));
+        // Создаём новый экземпляр класса MovieEntryAdapter. В качестве контекста передаём getActivity(), в качестве массива - flavorList.
+        movieEntryAdapter = new MovieEntryAdapter(getActivity(), Arrays.asList(movieEntries));
 
         // Получаем ссылку на ListView и прикрепляем к нему адаптер
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
-        gridView.setAdapter(flavorAdapter);
+        gridView.setAdapter(movieEntryAdapter);
 
 
         return rootView;
@@ -89,11 +106,34 @@ public class MovieFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private class FetchMoviesTask extends AsyncTask<String, Void, Void> {
+    private class FetchMoviesTask extends AsyncTask<String, Void, MovieEntry[]> {
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
+        //TODO: Доделать выборку остальных данных
+        private MovieEntry[] getMoviesDataFromJson(String jsonStr) throws JSONException {
+            // Создаём новый JSONObject
+            JSONObject jsonObject = new JSONObject(jsonStr);
+
+            // Получаем массив JSONArray по имени. В данном случае нас интересует массив results
+            JSONArray list = jsonObject.getJSONArray("results");
+
+            //TODO: Какое число здесь ставить? Можно поставить list.length
+            MovieEntry[] resultMovies = new MovieEntry[10];
+            for (int i = 0; i < 10; i++){
+                String title;
+
+                JSONObject movie = list.getJSONObject(i);
+                title = movie.getString("original_title");
+
+                resultMovies[i] = new MovieEntry(title);
+                Log.v(LOG_TAG, "Result #" + i + ": " + title);
+            }
+
+            return resultMovies;
+        }
+
         @Override
-        protected Void doInBackground(String... params) {
+        protected MovieEntry[] doInBackground(String... params) {
 
             // Проверка размера массива (если нет параметра, нечего проверять)
             if (params.length == 0){
@@ -106,7 +146,7 @@ public class MovieFragment extends Fragment {
             BufferedReader reader = null;
 
             // Will contain the raw JSON response as a string.
-            String forecastJsonStr = null;
+            String moviesJsonStr = null;
 
             try {
                 // Construct the URL for the OpenWeatherMap query
@@ -171,7 +211,7 @@ public class MovieFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
-                forecastJsonStr = buffer.toString();
+                moviesJsonStr = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -189,7 +229,54 @@ public class MovieFragment extends Fragment {
                     }
                 }
             }
+
+            try {
+                return getMoviesDataFromJson(moviesJsonStr);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(MovieEntry[] result) {
+            if (result != null) {
+                //movieEntryAdapter.clear();
+
+                //Если мы ориентируемся на HoneyComb и выше, можно использовать метод addAll, чтобы не добавлять записи одну за другой
+                for (MovieEntry movieEntry : result){
+                    movieEntryAdapter.add(movieEntry);
+                }
+            }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
