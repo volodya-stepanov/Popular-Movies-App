@@ -23,7 +23,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -73,8 +75,10 @@ public class MovieFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        List<MovieEntry> movieEntriesList = new ArrayList<MovieEntry>(Arrays.asList(movieEntries));
+
         // Создаём новый экземпляр класса MovieEntryAdapter. В качестве контекста передаём getActivity(), в качестве массива - flavorList.
-        movieEntryAdapter = new MovieEntryAdapter(getActivity(), Arrays.asList(movieEntries));
+        movieEntryAdapter = new MovieEntryAdapter(getActivity(), movieEntriesList);
 
         // Получаем ссылку на ListView и прикрепляем к нему адаптер
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
@@ -117,16 +121,20 @@ public class MovieFragment extends Fragment {
             // Получаем массив JSONArray по имени. В данном случае нас интересует массив results
             JSONArray list = jsonObject.getJSONArray("results");
 
-            //TODO: Какое число здесь ставить? Можно поставить list.length
-            MovieEntry[] resultMovies = new MovieEntry[10];
-            for (int i = 0; i < 10; i++){
-                String title;
+            //TODO: Какое число здесь ставить? Можно поставить list.length()
+            MovieEntry[] resultMovies = new MovieEntry[list.length()];
+            for (int i = 0; i < list.length(); i++){
 
                 JSONObject movie = list.getJSONObject(i);
-                title = movie.getString("original_title");
 
-                resultMovies[i] = new MovieEntry(title);
-                Log.v(LOG_TAG, "Result #" + i + ": " + title);
+                String title = movie.getString("original_title");
+                String posterPath = movie.getString("poster_path");
+                String plotSynopsys = movie.getString("overview");
+                double userRating = movie.getDouble("vote_average");
+                String releaseDate = movie.getString("release_date");
+
+                resultMovies[i] = new MovieEntry(title, posterPath, plotSynopsys, userRating, releaseDate);
+                //Log.v(LOG_TAG, "Result #" + i + ": " + title);
             }
 
             return resultMovies;
@@ -243,7 +251,7 @@ public class MovieFragment extends Fragment {
         @Override
         protected void onPostExecute(MovieEntry[] result) {
             if (result != null) {
-                //movieEntryAdapter.clear();
+                movieEntryAdapter.clear();
 
                 //Если мы ориентируемся на HoneyComb и выше, можно использовать метод addAll, чтобы не добавлять записи одну за другой
                 for (MovieEntry movieEntry : result){

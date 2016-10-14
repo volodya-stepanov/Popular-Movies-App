@@ -5,7 +5,7 @@ package com.example.android.PopularMoviesApp.app;
  */
 public class MovieEntry {
     String originalTitle;
-    int image;  // drawable reference id
+    String posterPath;
     String plotSynopsis;
     double userRating;
     String releaseDate;
@@ -14,15 +14,15 @@ public class MovieEntry {
         this.originalTitle = vTitle;
     }
 
-    public MovieEntry(String vTitle, String vPlot, int image){
+    public MovieEntry(String vTitle, String vPlot, String posterPath){
         this.originalTitle = vTitle;
         this.plotSynopsis = vPlot;
-        this.image = image;
+        this.posterPath = posterPath;
     }
 
-    public MovieEntry(String vTitle, int image, String vPlot, double vUserRating, String vReleaseDate){
+    public MovieEntry(String vTitle, String posterPath, String vPlot, double vUserRating, String vReleaseDate){
         this.originalTitle = vTitle;
-        this.image = image;
+        this.posterPath = posterPath;
         this.plotSynopsis = vPlot;
         this.userRating = vUserRating;
         this.releaseDate = vReleaseDate;
