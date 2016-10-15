@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -59,7 +58,7 @@ public class MovieEntryAdapter extends ArrayAdapter<MovieEntry> {
         }
 
         final String POSTER_PATH_BASE_URL = "http://image.tmdb.org/t/p/";
-        final String SIZE_PATH = "w185";
+        final String SIZE_PATH = "w342";
 
         // Создаём новый объект класса Uri.Builder
         StringBuilder builder = new StringBuilder(POSTER_PATH_BASE_URL);
@@ -68,13 +67,16 @@ public class MovieEntryAdapter extends ArrayAdapter<MovieEntry> {
         String stringUrl = builder.toString();
 
         ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
-        Picasso.with(getContext()).load(stringUrl)
+        Picasso.with(getContext())
+                .load(stringUrl)
+                //.resize(50, 50)
+                //.centerCrop()
                 .into(iconView);
         //iconView.setImageResource(movieEntry.posterPath);
 
-        TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
-        versionNameView.setText(movieEntry.originalTitle
-                + " - " + stringUrl);
+//        TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
+//        versionNameView.setText(movieEntry.originalTitle
+//                + " - " + stringUrl);
 
         return convertView;
     }

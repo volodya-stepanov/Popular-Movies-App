@@ -1,5 +1,7 @@
 package com.example.android.PopularMoviesApp.app;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -25,7 +28,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -50,6 +52,8 @@ public class MovieFragment extends Fragment {
 //            new MovieEntry("Lollipop", "5.0-5.1.1", R.drawable.lollipop)
 //    };
 
+    private ArrayList<MovieEntry> movieEntriesList;
+
     MovieEntry[] movieEntries = {
             new MovieEntry("Cupcake"),
             new MovieEntry("Donut"),
@@ -63,11 +67,43 @@ public class MovieFragment extends Fragment {
             new MovieEntry("Lollipop")
     };
 
+    /**
+     * Восстановление состояния операции
+     * @param savedInstanceState Объект Bundle, содержащий информацию о состоянии экземпляра
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Сначала всегда вызываем суперкласс
         super.onCreate(savedInstanceState);
+
+        // Поскольку метод onCreate() вызывается, если система создает новый экземпляр операции или восстанавливает предыдущий экземпляр, перед попыткой чтения необходимо убедиться, что Bundle имеет состояние null. В этом случае система создает новый экземпляр операции вместо восстановления ранее уничтоженного экземпляра.
+        // Здесь мы проверяем, что объект savedInstanceState равен null или не содержит необходимого нам ключа массива
+        if (savedInstanceState==null||!savedInstanceState.containsKey("movieEntries")){
+            // В этом случае мы заново создаём movieEntries
+            movieEntriesList = new ArrayList<MovieEntry>(Arrays.asList(movieEntries));
+        }
+        // Иначе (если такой ключ присутствует в объекте savedInstanceState)
+        else {
+            // Восстанавливаем flavorList из этого объекта
+            movieEntriesList = savedInstanceState.getParcelableArrayList("movieEntries");
+        }
+
         // Add this line in order for this fragment to handle menu events
         setHasOptionsMenu(true);
+    }
+
+    /**
+     * Сохранение состояния операции
+     * @param outState Объект Bundle, в котором хранятся пары "ключ-значение", сохраняющие состояние операции.
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // Сохраняем список вкусов с помощью метода putParcelableArrayList.
+        // Метод putParcelableArrayList вставляет список Parcelable значений в схему соответствия этого объекта Bundle, заменяя любое существующее значение для данного ключа. Как ключ, так и значение могут быть null.
+        outState.putParcelableArrayList("movieEntries", movieEntriesList);
+
+        // Необходимо всегда вызывать суперкласс, чтобы он мог сохранить состояние иерархии представлений.
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -75,7 +111,7 @@ public class MovieFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        List<MovieEntry> movieEntriesList = new ArrayList<MovieEntry>(Arrays.asList(movieEntries));
+        //movieEntriesList = new ArrayList<MovieEntry>(Arrays.asList(movieEntries));
 
         // Создаём новый экземпляр класса MovieEntryAdapter. В качестве контекста передаём getActivity(), в качестве массива - flavorList.
         movieEntryAdapter = new MovieEntryAdapter(getActivity(), movieEntriesList);
@@ -83,7 +119,17 @@ public class MovieFragment extends Fragment {
         // Получаем ссылку на ListView и прикрепляем к нему адаптер
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
         gridView.setAdapter(movieEntryAdapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MovieEntry clickedMovieEntry = movieEntryAdapter.getItem(position);
 
+                Context context = getActivity();
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("movieEntry", clickedMovieEntry);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
@@ -130,7 +176,7 @@ public class MovieFragment extends Fragment {
                 String title = movie.getString("original_title");
                 String posterPath = movie.getString("poster_path");
                 String plotSynopsys = movie.getString("overview");
-                double userRating = movie.getDouble("vote_average");
+                String userRating = movie.getString("vote_average");
                 String releaseDate = movie.getString("release_date");
 
                 resultMovies[i] = new MovieEntry(title, posterPath, plotSynopsys, userRating, releaseDate);
