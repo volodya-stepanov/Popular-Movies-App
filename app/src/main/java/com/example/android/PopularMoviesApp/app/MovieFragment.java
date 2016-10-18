@@ -2,9 +2,11 @@ package com.example.android.PopularMoviesApp.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,6 +37,13 @@ import java.util.Arrays;
 public class MovieFragment extends Fragment {
 
     public MovieFragment() {
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Обновить список фильмов
+        updateMovies();
     }
 
     private MovieEntryAdapter movieEntryAdapter;
@@ -148,12 +157,29 @@ public class MovieFragment extends Fragment {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-            FetchMoviesTask moviesTask = new FetchMoviesTask();
-            moviesTask.execute("top_rated");
+            // Обновить список фильмов
+            updateMovies();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Обновить список фильмов
+     */
+    private void updateMovies(){
+        // Получае объект SharedPreferences для считывани настроек
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        // Получаем из SharedPreferences настройку порядка сортировки
+        String sortOrder = sharedPreferences.getString(getString(R.string.pref_order_key), getString(R.string.pref_order_popular));
+
+        // Создаём асинхронное задание для получения списка фильмов из интернета
+        FetchMoviesTask moviesTask = new FetchMoviesTask();
+
+        // Запускаем это задание, передавая в качестве параметра настройку порядка сортировки
+        moviesTask.execute(sortOrder);
     }
 
     private class FetchMoviesTask extends AsyncTask<String, Void, MovieEntry[]> {
@@ -174,10 +200,22 @@ public class MovieFragment extends Fragment {
                 JSONObject movie = list.getJSONObject(i);
 
                 String title = movie.getString("original_title");
-                String posterPath = movie.getString("poster_path");
                 String plotSynopsys = movie.getString("overview");
                 String userRating = movie.getString("vote_average");
                 String releaseDate = movie.getString("release_date");
+
+                // Путь к изображению обрабатываем дополнительно, так как изначально в базе хранится относительный путь, а нам нужно присобачить к нему адрес и размер
+                String relativePosterPath = movie.getString("poster_path");
+
+                // Константы с адресом и размером
+                final String POSTER_PATH_BASE_URL = "http://image.tmdb.org/t/p/";
+                final String SIZE_PATH = "w342";
+
+                // Сцепляем строки с помощью объекта StringBuilder
+                StringBuilder builder = new StringBuilder(POSTER_PATH_BASE_URL);
+                builder.append(SIZE_PATH);
+                builder.append(relativePosterPath);
+                String posterPath = builder.toString();
 
                 resultMovies[i] = new MovieEntry(title, posterPath, plotSynopsys, userRating, releaseDate);
                 //Log.v(LOG_TAG, "Result #" + i + ": " + title);

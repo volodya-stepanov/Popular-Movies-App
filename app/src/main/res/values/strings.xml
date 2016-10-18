@@ -7,5 +7,27 @@
     <string name="action_share">Share</string>
     <string name="action_refresh">Refresh</string>
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!--Строки, относящиеся к настройкам-->
+    <!--Название настройки порядка сортировки-->
+    <string name="pref_order_label">Sort Order</string>
+
+    <!--Название настройки порядка сортировки - Популярные-->
+    <string name="pref_order_label_popular">Popular</string>
+
+    <!--Название настройки порядка сортировки - С наивысшим рейтингом-->
+    <string name="pref_order_label_top_rated">Top Rated</string>
+
+
+
+    <!--Название ключа для хранения порядка сортировки в объекте SharedPreferences-->
+    <string name="pref_order_key" translatable="false">order</string>
+
+    <!--Значение в объекте SharedPreferences настройки порядка сортировки - Популярные-->
+    <string name="pref_order_popular" translatable="false">popular</string>
+
+    <!--Значение в объекте SharedPreferences настройки порядка сортировки - С наивысшим рейтингом-->
+    <string name="pref_order_top_rated" translatable="false">top_rated</string>
 
 </resources>

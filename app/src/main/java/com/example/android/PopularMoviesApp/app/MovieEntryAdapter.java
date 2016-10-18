@@ -57,26 +57,12 @@ public class MovieEntryAdapter extends ArrayAdapter<MovieEntry> {
                     R.layout.grid_item_layout, parent, false);
         }
 
-        final String POSTER_PATH_BASE_URL = "http://image.tmdb.org/t/p/";
-        final String SIZE_PATH = "w342";
-
-        // Создаём новый объект класса Uri.Builder
-        StringBuilder builder = new StringBuilder(POSTER_PATH_BASE_URL);
-        builder.append(SIZE_PATH);
-        builder.append(movieEntry.posterPath);
-        String stringUrl = builder.toString();
-
         ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
         Picasso.with(getContext())
-                .load(stringUrl)
+                .load(movieEntry.getPosterPath())
                 //.resize(50, 50)
                 //.centerCrop()
                 .into(iconView);
-        //iconView.setImageResource(movieEntry.posterPath);
-
-//        TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
-//        versionNameView.setText(movieEntry.originalTitle
-//                + " - " + stringUrl);
 
         return convertView;
     }

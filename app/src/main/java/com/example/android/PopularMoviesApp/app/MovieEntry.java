@@ -7,11 +7,51 @@ import android.os.Parcelable;
  * Created by Володя on 10.10.2016.
  */
 public class MovieEntry implements Parcelable{
-    String originalTitle;
-    String posterPath;
-    String plotSynopsis;
-    String userRating;
-    String releaseDate;
+    private String originalTitle;
+    private String posterPath;
+    private String plotSynopsis;
+    private String userRating;
+    private String releaseDate;
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public String getPosterPath() {
+        return posterPath;
+    }
+
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
+    }
+
+    public String getPlotSynopsis() {
+        return plotSynopsis;
+    }
+
+    public void setPlotSynopsis(String plotSynopsis) {
+        this.plotSynopsis = plotSynopsis;
+    }
+
+    public String getUserRating() {
+        return userRating;
+    }
+
+    public void setUserRating(String userRating) {
+        this.userRating = userRating;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
 
     public MovieEntry(String vTitle){
         this.originalTitle = vTitle;
